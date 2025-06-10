@@ -1,13 +1,14 @@
-Netmiko - Cisco Port-Channel Migration (IOS-XE / IOS-XR)
-· Documentation · Report Bug · Request Feature
-🌟 About the Project
+<div align='center'>
 
-    This project is designed to automate the cutover of HSRP between port-channels on the same router. Connectivity between HSRP endpoints is via a standard L2 switch with corresponding port-channels and VLAN trunks. 
+<h1>Netmiko - Cisco Port-Channel Migration (IOS-XE / IOS-XR)</h1>
+<h4> <span> · </span> <a href="https://github.com/daisy-dynawhite/Cisco-CMD/blob/master/README.md"> Documentation </a> <span> · </span> <a href="https://github.com/daisy-dynawhite/Cisco-CMD/issues"> Report Bug </a> <span> · </span> <a href="https://github.com/daisy-dynawhite/Cisco-CMD/issues"> Request Feature </a> </h4>
+</div>
 
-    There are two pairs of routers participating in HSRP that must be moved to another port-channel on the same router, something that might be done when moving the traffic path for upstream devices concurrently.
-
-    The routers are virtualised ASR1Ks (CSR1000v) and ASR9Ks (IOSXRv) and the switch is just an IOS-L2 image.
+# :star2: About the Project
     
-🎯 Languages
+- <p>This project is designed to automate the cutover of HSRP between port-channels on the same router. Connectivity between HSRP endpoints is via a standard L2 switch with corresponding port-channels and VLAN trunks. </p>
+- <p>There are two pairs of routers participating in HSRP that must be moved to another port-channel on the same router, something that might be done when moving the traffic path for upstream devices concurrently.</p>
+- <p>The routers are virtualised ASR1Ks (CSR1000v) and ASR9Ks (IOSXRv) and the switch is just an IOS-L2 image.</p>
 
-    Python3, YAML.
+## :dart: Languages
+- Python3 and YAML.
