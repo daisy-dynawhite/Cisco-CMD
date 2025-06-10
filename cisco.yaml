@@ -8,16 +8,21 @@
     xr1: 192.168.1.227
     xr2: 192.168.1.228
 
-  hsrp:
-  - physip1: 192.168.5.2
-    physip2: 192.168.5.3
-    vip: 192.168.5.1
+  hsrpvars:
+  - xephysip1: 192.168.5.2
+    xephysip2: 192.168.5.3
+    xrphysip1: 192.168.5.5
+    xrphysip2: 192.168.5.6
+    xevip: 192.168.5.1
+    xrvip: 192.168.5.4
     mask: 255.255.255.0
     actpri: 115
     sbypri: 105
     vrf: DAYZ
-    podel: 1
-    poadd: 2
-    group: 10
+    podel: 2
+    poadd: 1
+    xegroup: 10
+    xrgroup: 5
     encap: 5
+
 

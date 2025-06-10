@@ -70,67 +70,146 @@ def setup_connections(config_data, admin, adminpword):
 def process_rtrs(config_data, connections):
 	try:
 		#Iterate through YAML vars and execute
-		hsrp = config_data.get('hsrp',[])
+		hsrpvars = config_data.get('hsrpvars',[])
 
-		for vars in hsrp:
-			physip1 = vars['physip1']
-			physip2 = vars['physip2']
-			vip = vars['vip']
+		for vars in hsrpvars:
+			xephysip1 = vars['xephysip1']
+			xephysip2 = vars['xephysip2']
+			xrphysip1 = vars['xrphysip1']
+			xrphysip2 = vars['xrphysip2']
+			xevip = vars['xevip']
+			xrvip = vars['xrvip']
 			mask = vars['mask']
 			vrf = vars['vrf']
 			actpri = vars['actpri']
 			sbypri = vars['sbypri']
 			podel = vars['podel']
 			poadd = vars['poadd']
-			group = vars['group']
+			xegroup = vars['xegroup']
+			xrgroup = vars['xrgroup']
 			encap = vars['encap']
 
-		delvip = (f"no int po{podel}.{encap}")
+		delvipxe = (f"no int po{podel}.{encap}")
+		delhsrp = (f"no router hsrp interface bundle-Ether {podel}.{encap}")
+		delvipxr = (f"no int bundle-ether {podel}.{encap}") 
 
-		addvip1 = [
-		f"int po{poadd}.5",
-		"encapsulation dot1q 5",
+		addvip1xe = [
+		f"int po{poadd}.{encap}",
+		f"encapsulation dot1q {encap}",
 		f"vrf forwarding {vrf}",
-		f"ip address {physip1} {mask}",
-		"standby version 2",
-		f"standby {group} ip {vip}",
-		"standby {group} timers msec 600 2",
-		f"standby {group} priority {actpri}",
-		"standby {group} preempt delay minimum 40 reload 60",
+		f"ip address {xephysip1} {mask}",
+		f"standby version 2",
+		f"standby {xegroup} ip {xevip}",
+		f"standby {xegroup} timers msec 600 2",
+		f"standby {xegroup} priority {actpri}",
+		f"standby {xegroup} preempt",
 		"no shut",
 		]
 
-		addvip2 = [
-		f"int po{poadd}.5",
-		"encapsulation dot1q 5",
+		addvip2xe = [
+		f"int po{poadd}.{encap}",
+		f"encapsulation dot1q {encap}",
 		f"vrf forwarding {vrf}",
-		f"ip address {physip2} {mask}",
-		"standby version 2",
-		f"standby {group} ip {vip}",
-		"standby {group} timers msec 600 2",
-		f"standby {group} priority {sbypri}",
-		"standby {group} preempt delay minimum 40 reload 60",
+		f"ip address {xephysip2} {mask}",
+		f"standby version 2",
+		f"standby {xegroup} ip {xevip}",
+		f"standby {xegroup} timers msec 600 2",
+		f"standby {xegroup} priority {sbypri}",
+		f"standby {xegroup} preempt",
 		"no shut",
 		]
 
-		checkhsrp = "do show standby brief"
+		addvip1xr = [
+		f"int bundle-ether{poadd}.{encap}",
+		f"ipv4 address {xrphysip1} {mask}",
+		f"encapsulation dot1q {encap}",
+		"no shut",
+		]
 
-		connections['nc_rtr1'].send_config_set(delvip)
-		print (f"Po{podel}.{encap} deleted from router 1")
+		addvip2xr = [
+		f"int bundle-ether{poadd}.{encap}",
+		f"ipv4 address {xrphysip2} {mask}",
+		f"encapsulation dot1q {encap}",
+		"no shut",
+		]
+
+		addhsrp1xr = [
+		f"router hsrp interface bundle-ether{poadd}.{encap} hsrp redirects disable",
+		f"router hsrp interface bundle-ether{poadd}.{encap} address-family ipv4",
+		f"hsrp {xrgroup} version 2",
+		f"prempt",
+		f"priority {actpri}",
+		f"address {xrvip}",
+		]
+
+		addhsrp2xr = [
+		f"router hsrp interface bundle-ether{poadd}.{encap} hsrp redirects disable",
+		f"router hsrp interface bundle-ether{poadd}.{encap} address-family ipv4",
+		f"hsrp {xrgroup} version 2",
+		f"prempt",
+		f"priority {sbypri}",
+		f"address {xrvip}",
+		]
+
+		checkhsrpxe = "do show standby brief"
+		checkhsrpxr = "do show hsrp brief"
+		
+		#Delete VIPs on XE devices
+		print ("\nIOS-XE VIP Cutover\n")
+		connections['nc_rtr1'].send_config_set(delvipxe)
+		print (f"Po{podel}.{encap} deleted from IOS-XE router 1")
 		file.write(f"Po{podel}.{encap} deleted from XE router 1 \n\n")
-		connections['nc_rtr2'].send_config_set(delvip)
-		print (f"Po{podel}.{encap} deleted from router 2")
+
+		connections['nc_rtr2'].send_config_set(delvipxe)
+		print (f"Po{podel}.{encap} deleted from IOS-XE router 2")
 		file.write(f"Po{podel}.{encap} deleted from XE router 2 \n\n")
-		connections['nc_rtr1'].send_config_set(addvip1)
-		print (f"Po{poadd}.{encap} created on router 1")
-		file.write(f"Po{poadd}.{encap} created on router 1 \n\n")
-		connections['nc_rtr2'].send_config_set(addvip2)
-		print (f"Po{poadd}.{encap} created on router 2 \n\n")
-		file.write(f"Po{poadd}.{encap} created on router 2 \n")
+		
+		#Create VIPs on XE devices
+
+		connections['nc_rtr1'].send_config_set(addvip1xe)
+		print (f"Po{poadd}.{encap} created on IOS-XE router 1")
+		file.write(f"Po{poadd}.{encap} created on XE router 1 \n\n")
+		
+		connections['nc_rtr2'].send_config_set(addvip2xe)
+		print (f"Po{poadd}.{encap} created on IOS-XE router 2 \n")
+		file.write(f"Po{poadd}.{encap} created on XE router 2 \n\n")
+		
+		#Delete VIPs on XR devices
+		print ("IOS-XR VIP Cutover\n")
+		connections['nc_rtr3'].config_mode()
+		connections['nc_rtr3'].send_config_set(delvipxr)
+		connections['nc_rtr3'].send_config_set(delhsrp)	  
+		print (f"Bundle-Ether{podel}.{encap} and HSRP config deleted from XR router 1")
+		file.write(f"Po{podel}.{encap} deleted from XR router 1 \n\n")
+
+		connections['nc_rtr4'].config_mode()
+		connections['nc_rtr4'].send_config_set(delvipxr)
+		connections['nc_rtr4'].send_config_set(delhsrp)			
+		print (f"Bundle-Ether{podel}.{encap} and HSRP config  deleted from XR router 2")
+		file.write(f"Po{podel}.{encap} deleted from XR router 2 \n\n")
+
+		#Create VIPs on XR devices
+				   
+		connections['nc_rtr3'].config_mode()		
+		connections['nc_rtr3'].send_config_set(addvip1xr)
+		connections['nc_rtr3'].send_config_set(addhsrp1xr)
+		connections['nc_rtr3'].commit()		   
+		print (f"Bundle-Ether{poadd}.{encap} and HSRP config created on XR router 1")
+		file.write(f"Po{poadd}.{encap} created on XR router 1 \n\n")
+		
+		connections['nc_rtr4'].config_mode()
+		connections['nc_rtr4'].send_config_set(addvip2xr)
+		connections['nc_rtr4'].send_config_set(addhsrp2xr)
+		connections['nc_rtr4'].commit()
+		print (f"Bundle-Ether{poadd}.{encap} and HSRP config created on XR router 2 \n")
+		file.write(f"Po{poadd}.{encap} created on XR router 2")
+		
+		#Await HSRP convergence
+
 		print ("Script sleeping 20s whilst HSRP converges \n")
 		time.sleep(20.0)
-		hsrp1 = connections['nc_rtr1'].send_config_set(checkhsrp)
-		hsrp2 = connections['nc_rtr2'].send_config_set(checkhsrp)
+		hsrp1 = connections['nc_rtr1'].send_config_set(checkhsrpxe)
+		hsrp2 = connections['nc_rtr2'].send_config_set(checkhsrpxe)
 		file.write(f"HSRP on router 1 \n\n{hsrp1}")
 		file.write(f"\n\n HSRP on router 2 \n\n{hsrp2}")
 
@@ -153,7 +232,6 @@ def main():
 	connections = setup_connections(config_data, admin, adminpword)
 	logging.info("Netmiko connections established\n")
 	input("All connections are established, hit enter to continue, CTRL-Z to exit")
-	print("\n")
 
 	# Start duration timer
 	start_time = time.perf_counter()
