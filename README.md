@@ -1,6 +1,6 @@
 <div align='center'>
 
-<h1>Netmiko - Cisco Port-Channel Migration (IOS-XE / IOS-XR)</h1>
+<h1>Netmiko - Cisco - Port-Channel Migration</h1>
 <h4> <span> · </span> <a href="https://github.com/daisy-dynawhite/Cisco-CMD/blob/master/README.md"> Documentation </a> <span> · </span> <a href="https://github.com/daisy-dynawhite/Cisco-CMD/issues"> Report Bug </a> <span> · </span> <a href="https://github.com/daisy-dynawhite/Cisco-CMD/issues"> Request Feature </a> </h4>
 </div>
 
