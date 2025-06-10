@@ -12,3 +12,6 @@
 
 ## :dart: Languages
 - Python3 and YAML.
+  
+## :camera: Screenshots
+<div align="left"> <a href=""><img src="https://github.com/daisy-dynawhite/Cisco-CMD/blob/main/Cisco-CMD-Output.png" alt='image' width='293' height='419'/></a> </div>
