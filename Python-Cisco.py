@@ -153,9 +153,39 @@ def process_rtrs(config_data, connections):
 
 		checkhsrpxe = "do show standby brief"
 		checkhsrpxr = "do show hsrp brief"
+
+		#Delete VIPs on XR devices
+		print ("\nIOS-XR VIP Cutover\n")
+		connections['nc_rtr3'].config_mode()
+		connections['nc_rtr3'].send_config_set(delvipxr)
+		connections['nc_rtr3'].send_config_set(delhsrp)	  
+		print (f"Bundle-Ether{podel}.{encap} and HSRP config deleted from XR router 1")
+		file.write(f"Po{podel}.{encap} deleted from XR router 1 \n\n")
+
+		connections['nc_rtr4'].config_mode()
+		connections['nc_rtr4'].send_config_set(delvipxr)
+		connections['nc_rtr4'].send_config_set(delhsrp)			
+		print (f"Bundle-Ether{podel}.{encap} and HSRP config deleted from XR router 2")
+		file.write(f"Po{podel}.{encap} deleted from XR router 2 \n\n")
+
+		#Create VIPs on XR devices
+				   
+		connections['nc_rtr3'].config_mode()		
+		connections['nc_rtr3'].send_config_set(addvip1xr)
+		connections['nc_rtr3'].send_config_set(addhsrp1xr)
+		connections['nc_rtr3'].commit()		   
+		print (f"Bundle-Ether{poadd}.{encap} and HSRP config created on XR router 1")
+		file.write(f"Po{poadd}.{encap} created on XR router 1 \n\n")
+		
+		connections['nc_rtr4'].config_mode()
+		connections['nc_rtr4'].send_config_set(addvip2xr)
+		connections['nc_rtr4'].send_config_set(addhsrp2xr)
+		connections['nc_rtr4'].commit()
+		print (f"Bundle-Ether{poadd}.{encap} and HSRP config created on XR router 2 \n")
+		file.write(f"Po{poadd}.{encap} created on XR router 2")
 		
 		#Delete VIPs on XE devices
-		print ("\nIOS-XE VIP Cutover\n")
+		print ("IOS-XE VIP Cutover\n")
 		connections['nc_rtr1'].send_config_set(delvipxe)
 		print (f"Po{podel}.{encap} deleted from IOS-XE router 1")
 		file.write(f"Po{podel}.{encap} deleted from XE router 1 \n\n")
@@ -174,35 +204,7 @@ def process_rtrs(config_data, connections):
 		print (f"Po{poadd}.{encap} created on IOS-XE router 2 \n")
 		file.write(f"Po{poadd}.{encap} created on XE router 2 \n\n")
 		
-		#Delete VIPs on XR devices
-		print ("IOS-XR VIP Cutover\n")
-		connections['nc_rtr3'].config_mode()
-		connections['nc_rtr3'].send_config_set(delvipxr)
-		connections['nc_rtr3'].send_config_set(delhsrp)	  
-		print (f"Bundle-Ether{podel}.{encap} and HSRP config deleted from XR router 1")
-		file.write(f"Po{podel}.{encap} deleted from XR router 1 \n\n")
 
-		connections['nc_rtr4'].config_mode()
-		connections['nc_rtr4'].send_config_set(delvipxr)
-		connections['nc_rtr4'].send_config_set(delhsrp)			
-		print (f"Bundle-Ether{podel}.{encap} and HSRP config  deleted from XR router 2")
-		file.write(f"Po{podel}.{encap} deleted from XR router 2 \n\n")
-
-		#Create VIPs on XR devices
-				   
-		connections['nc_rtr3'].config_mode()		
-		connections['nc_rtr3'].send_config_set(addvip1xr)
-		connections['nc_rtr3'].send_config_set(addhsrp1xr)
-		connections['nc_rtr3'].commit()		   
-		print (f"Bundle-Ether{poadd}.{encap} and HSRP config created on XR router 1")
-		file.write(f"Po{poadd}.{encap} created on XR router 1 \n\n")
-		
-		connections['nc_rtr4'].config_mode()
-		connections['nc_rtr4'].send_config_set(addvip2xr)
-		connections['nc_rtr4'].send_config_set(addhsrp2xr)
-		connections['nc_rtr4'].commit()
-		print (f"Bundle-Ether{poadd}.{encap} and HSRP config created on XR router 2 \n")
-		file.write(f"Po{poadd}.{encap} created on XR router 2")
 		
 		#Await HSRP convergence
 

@@ -1,7 +1,13 @@
 
 *** L3 Migration PVT Script *** 
 
-Po2.5 deleted from XE router 1 
+Po2.5 deleted from XR router 1 
+
+Po2.5 deleted from XR router 2 
+
+Po1.5 created on XR router 1 
+
+Po1.5 created on XR router 2Po2.5 deleted from XE router 1 
 
 Po2.5 deleted from XE router 2 
 
@@ -9,13 +15,7 @@ Po1.5 created on XE router 1
 
 Po1.5 created on XE router 2 
 
-Po2.5 deleted from XR router 1 
-
-Po2.5 deleted from XR router 2 
-
-Po1.5 created on XR router 1 
-
-Po1.5 created on XR router 2HSRP on router 1 
+HSRP on router 1 
 
 configure terminal
 Enter configuration commands, one per line.  End with CNTL/Z.
