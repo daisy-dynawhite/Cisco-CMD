@@ -16,7 +16,7 @@ def setup_vars():
 	global config_data
 
 	# Print banner
-	print("\n*** L3 Migration Script ***\n\nPlease enter credentials!\n")
+	print("\n*** HSRP VIP Migration Script ***\n\nPlease enter credentials!\n")
 
 	# Setup logging
 	logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%d %b %y - %H:%M:%S')
@@ -42,8 +42,10 @@ def setup_connections(config_data, admin, adminpword):
 	devicevars = config_data.get('devices',[])[0]
 
 	devices = {
-		'nc_rtr1': {'host': devicevars['router1'], 'device_type': 'cisco_xe'},
-		'nc_rtr2': {'host': devicevars['router2'], 'device_type': 'cisco_xe'},	
+		'nc_rtr1': {'host': devicevars['xe1'], 'device_type': 'cisco_xe'},
+		'nc_rtr2': {'host': devicevars['xe2'], 'device_type': 'cisco_xe'},
+		'nc_rtr3': {'host': devicevars['xr1'], 'device_type': 'cisco_xr'},
+		'nc_rtr4': {'host': devicevars['xr2'], 'device_type': 'cisco_xr'},
 	}
 
 	connections = {}
@@ -73,60 +75,60 @@ def process_rtrs(config_data, connections):
 		for vars in hsrp:
 			physip1 = vars['physip1']
 			physip2 = vars['physip2']
-			vip = vars['vip'] 
+			vip = vars['vip']
 			mask = vars['mask']
 			vrf = vars['vrf']
 			actpri = vars['actpri']
 			sbypri = vars['sbypri']
 			podel = vars['podel']
 			poadd = vars['poadd']
+			group = vars['group']
+			encap = vars['encap']
 
-		delvip = (f"no int po{podel}.6")
+		delvip = (f"no int po{podel}.{encap}")
 
 		addvip1 = [
-		f"int po{poadd}.6",
-		"encapsulation dot1q 6",
+		f"int po{poadd}.5",
+		"encapsulation dot1q 5",
 		f"vrf forwarding {vrf}",
 		f"ip address {physip1} {mask}",
 		"standby version 2",
-		f"standby 1 ip {vip}",
-		"standby 1 timers msec 600 2",
-		f"standby 1 priority {actpri}",
-		"standby 1 preempt delay minimum 40 reload 60",
-		"standby use-bia",
+		f"standby {group} ip {vip}",
+		"standby {group} timers msec 600 2",
+		f"standby {group} priority {actpri}",
+		"standby {group} preempt delay minimum 40 reload 60",
 		"no shut",
 		]
 
 		addvip2 = [
-		f"int po{poadd}.6",
-		"encapsulation dot1q 6",
+		f"int po{poadd}.5",
+		"encapsulation dot1q 5",
 		f"vrf forwarding {vrf}",
 		f"ip address {physip2} {mask}",
 		"standby version 2",
-		f"standby 1 ip {vip}",
-		"standby 1 timers msec 600 2",
-		f"standby 1 priority {sbypri}",
-		"standby 1 preempt delay minimum 40 reload 60",
-		"standby use-bia",
+		f"standby {group} ip {vip}",
+		"standby {group} timers msec 600 2",
+		f"standby {group} priority {sbypri}",
+		"standby {group} preempt delay minimum 40 reload 60",
 		"no shut",
 		]
 
 		checkhsrp = "do show standby brief"
 
 		connections['nc_rtr1'].send_config_set(delvip)
-		print (f"Po{podel}.6 deleted from router 1")
-		file.write(f"Po{podel}.6 deleted from router 1 \n\n")
+		print (f"Po{podel}.{encap} deleted from router 1")
+		file.write(f"Po{podel}.{encap} deleted from XE router 1 \n\n")
 		connections['nc_rtr2'].send_config_set(delvip)
-		print (f"Po{podel}.6 deleted from router 2")
-		file.write(f"Po{podel}.6 deleted from router 2 \n\n")
+		print (f"Po{podel}.{encap} deleted from router 2")
+		file.write(f"Po{podel}.{encap} deleted from XE router 2 \n\n")
 		connections['nc_rtr1'].send_config_set(addvip1)
-		print (f"Po{poadd}.6 created on router 1")
-		file.write(f"Po{poadd}.6 created on router 1 \n\n")
+		print (f"Po{poadd}.{encap} created on router 1")
+		file.write(f"Po{poadd}.{encap} created on router 1 \n\n")
 		connections['nc_rtr2'].send_config_set(addvip2)
-		print (f"Po{poadd}.6 created on router 2 \n\n")
-		file.write(f"Po{poadd}.6 created on router 2 \n")
-		print ("Script sleeping 10s whilst HSRP converges \n")
-		time.sleep(10.0)
+		print (f"Po{poadd}.{encap} created on router 2 \n\n")
+		file.write(f"Po{poadd}.{encap} created on router 2 \n")
+		print ("Script sleeping 20s whilst HSRP converges \n")
+		time.sleep(20.0)
 		hsrp1 = connections['nc_rtr1'].send_config_set(checkhsrp)
 		hsrp2 = connections['nc_rtr2'].send_config_set(checkhsrp)
 		file.write(f"HSRP on router 1 \n\n{hsrp1}")

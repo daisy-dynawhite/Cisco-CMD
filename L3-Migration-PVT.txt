@@ -1,0 +1,33 @@
+
+*** L3 Migration PVT Script *** 
+
+Po1.5 deleted from XE router 1 
+
+Po1.5 deleted from XE router 2 
+
+Po2.5 created on router 1 
+
+Po2.5 created on router 2 
+HSRP on router 1 
+
+configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+C1(config)#do show standby brief
+                     P indicates configured to preempt.
+                     |
+Interface   Grp  Pri P State   Active          Standby         Virtual IP
+Po2.5       10   115   Speak   unknown         unknown         192.168.5.1
+C1(config)#end
+C1#
+
+ HSRP on router 2 
+
+configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+C2(config)#do show standby brief
+                     P indicates configured to preempt.
+                     |
+Interface   Grp  Pri P State   Active          Standby         Virtual IP
+Po2.5       10   105   Listen  unknown         unknown         192.168.5.1
+C2(config)#end
+C2#

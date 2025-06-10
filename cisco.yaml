@@ -1,0 +1,23 @@
+---
+
+# Host variables
+
+  devices:
+  - xe1: 192.168.1.225
+    xe2: 192.168.1.226
+    xr1: 192.168.1.227
+    xr2: 192.168.1.228
+
+  hsrp:
+  - physip1: 192.168.5.2
+    physip2: 192.168.5.3
+    vip: 192.168.5.1
+    mask: 255.255.255.0
+    actpri: 115
+    sbypri: 105
+    vrf: DAYZ
+    podel: 1
+    poadd: 2
+    group: 10
+    encap: 5
+
