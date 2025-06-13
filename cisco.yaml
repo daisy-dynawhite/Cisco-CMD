@@ -19,8 +19,8 @@
     actpri: 115
     sbypri: 105
     vrf: DAYZ
-    podel: 2
-    poadd: 1
+    podel: 1
+    poadd: 2
     xegroup: 10
     xrgroup: 5
     encap: 5
